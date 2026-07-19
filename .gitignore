@@ -28,3 +28,9 @@ build/
 
 # Coverage
 coverage/
+
+# Local AI-assistant session artifacts (Ralph loop state, etc.)
+.claude/*.local.md
+.claude/*.local.json
+.claude/settings.local.json
+.playwright-mcp/
