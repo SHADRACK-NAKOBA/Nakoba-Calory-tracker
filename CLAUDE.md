@@ -10,6 +10,9 @@ estimate calories, a healthiness rating, and a portion recommendation.
 - Vanilla HTML/CSS/JS (frontend, no framework)
 - Google Gemini API — `@google/generative-ai` is in use; `POST /api/analyze-food`
   in `server.js` accepts a base64 image and returns structured JSON.
+- Security: `helmet` (CSP allows inline script/style since `index.html` is
+  self-contained), `cors` (same-origin only unless `ALLOWED_ORIGIN` is set),
+  and `express-rate-limit` on `/api/analyze-food` (100 requests / 15 min).
 
 ## Folder Structure
 As the project grows, expect this layout:

@@ -2,6 +2,9 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
@@ -30,6 +33,25 @@ Respond with ONLY a JSON object (no markdown, no extra text) matching exactly th
 }
 Estimate calories for the visible portion as best you can. If the image does not clearly show food, set food_name to "Unrecognized" and confidence to "low".`;
 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      // index.html is a single self-contained file with inline <style>/<script> — no external assets.
+      'script-src': ["'self'", "'unsafe-inline'"],
+      'style-src': ["'self'", "'unsafe-inline'"],
+    },
+  },
+}));
+app.use(cors({ origin: process.env.ALLOWED_ORIGIN || false }));
+
+const analyzeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -56,7 +78,7 @@ function coerceAnalysis(raw) {
   };
 }
 
-app.post('/api/analyze-food', async (req, res) => {
+app.post('/api/analyze-food', analyzeLimiter, async (req, res) => {
   if (!genAI) {
     return res.status(500).json({ error: 'Server is missing a Gemini API key.' });
   }
