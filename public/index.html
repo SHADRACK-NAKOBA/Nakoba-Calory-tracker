@@ -6,12 +6,12 @@
 <title>K21 Calorie Tracker</title>
 <style>
   :root {
-    --green: #2f9e6e;
+    --green: #1c7550;
     --green-light: #e6f6ee;
-    --orange: #f0924a;
+    --orange: #a8511a;
     --orange-light: #fdece0;
     --ink: #223026;
-    --muted: #6b7d73;
+    --muted: #566860;
     --bg: #f7faf8;
     --card: #ffffff;
     --border: #e3ece6;
@@ -241,7 +241,7 @@
   .meal-type-breakfast { background: var(--orange-light); color: var(--orange); }
   .meal-type-lunch { background: var(--green-light); color: var(--green); }
   .meal-type-dinner { background: #e7ecfa; color: #4a5fc1; }
-  .meal-type-snack { background: #f5e9fa; color: #9b4fc4; }
+  .meal-type-snack { background: #f5e9fa; color: #833a9e; }
 
   .meal-right {
     display: flex;
@@ -381,6 +381,14 @@
       animation: none !important;
       transition: none !important;
     }
+  }
+
+  /* Focus visibility for all interactive elements */
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
   }
 
   /* Daily insight */
@@ -576,35 +584,35 @@
       <div class="progress-track">
         <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
       </div>
-      <div class="progress-caption" id="progress-caption">0% of today's goal</div>
-      <div class="insight" id="insight">
+      <div class="progress-caption" id="progress-caption" aria-live="polite">0% of today's goal</div>
+      <div class="insight" id="insight" aria-live="polite">
         <div class="insight-label">Today's insight</div>
         <div id="insight-text">Log a meal to see today's insight.</div>
       </div>
     </section>
 
-    <section class="card">
-      <h2>Snap Your Food</h2>
+    <section class="card" aria-labelledby="snap-heading">
+      <h2 id="snap-heading">Snap Your Food</h2>
       <div class="snap-actions">
         <label class="snap-btn" for="snap-file-input">
           Upload photo
           <input type="file" id="snap-file-input" class="snap-file-input" accept="image/*">
         </label>
-        <button type="button" class="snap-btn" id="webcam-toggle-btn">Use webcam</button>
+        <button type="button" class="snap-btn" id="webcam-toggle-btn" aria-expanded="false" aria-controls="webcam-wrap">Use webcam</button>
       </div>
 
       <div class="webcam-wrap" id="webcam-wrap">
-        <video id="webcam-video" autoplay playsinline></video>
+        <video id="webcam-video" autoplay playsinline aria-label="Webcam preview"></video>
         <button type="button" class="snap-btn" id="webcam-capture-btn">Capture photo</button>
         <canvas id="webcam-canvas" hidden></canvas>
       </div>
 
-      <div class="snap-status" id="snap-status">
-        <span class="spinner"></span>
+      <div class="snap-status" id="snap-status" role="status">
+        <span class="spinner" aria-hidden="true"></span>
         <span>Analyzing your food photo…</span>
       </div>
 
-      <div class="snap-error" id="snap-error"></div>
+      <div class="snap-error" id="snap-error" role="alert"></div>
 
       <div class="result-card" id="result-card">
         <div class="result-top">
@@ -774,7 +782,7 @@
         </div>
         <div class="meal-right">
           <span class="meal-cal">${meal.calories} kcal</span>
-          <button class="delete-btn" data-id="${meal.id}" title="Delete meal">&times;</button>
+          <button class="delete-btn" data-id="${meal.id}" title="Delete meal" aria-label="Delete ${escapeHtml(meal.name)}">&times;</button>
         </div>
       `;
       els.mealList.appendChild(li);
@@ -957,6 +965,7 @@
     els.resultStars.innerHTML = Array.from({ length: 5 }, (_, i) =>
       `<span class="${i < rating ? '' : 'star-empty'}">★</span>`
     ).join('');
+    els.resultStars.setAttribute('aria-label', `Healthiness rating: ${rating} out of 5`);
 
     els.resultCard.dataset.name = data.food_name;
     els.resultCard.dataset.calories = data.estimated_calories;
@@ -1013,6 +1022,7 @@
       webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
       els.webcamVideo.srcObject = webcamStream;
       els.webcamWrap.classList.add('is-active');
+      els.webcamToggleBtn.setAttribute('aria-expanded', 'true');
       els.webcamToggleBtn.textContent = 'Close webcam';
     } catch {
       showSnapError('Could not access the webcam. You can still upload a photo instead.');
@@ -1025,6 +1035,7 @@
       webcamStream = null;
     }
     els.webcamWrap.classList.remove('is-active');
+    els.webcamToggleBtn.setAttribute('aria-expanded', 'false');
     els.webcamToggleBtn.textContent = 'Use webcam';
   }
 
