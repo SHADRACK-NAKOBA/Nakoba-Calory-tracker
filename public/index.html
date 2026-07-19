@@ -346,6 +346,23 @@
     }
   }
 
+  /* Daily insight */
+  .insight {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
+
+  .insight .insight-label {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
   /* Snap Your Food */
   .snap-actions {
     display: flex;
@@ -523,6 +540,10 @@
         <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
       </div>
       <div class="progress-caption" id="progress-caption">0% of today's goal</div>
+      <div class="insight" id="insight">
+        <div class="insight-label">Today's insight</div>
+        <div id="insight-text">Log a meal to see today's insight.</div>
+      </div>
     </section>
 
     <section class="card">
@@ -617,6 +638,7 @@
     mealList: document.getElementById('meal-list'),
     emptyState: document.getElementById('empty-state'),
     chart: document.getElementById('chart'),
+    insightText: document.getElementById('insight-text'),
     snapFileInput: document.getElementById('snap-file-input'),
     webcamToggleBtn: document.getElementById('webcam-toggle-btn'),
     webcamWrap: document.getElementById('webcam-wrap'),
@@ -767,11 +789,44 @@
     return div.innerHTML;
   }
 
+  function renderInsight() {
+    const todayKey = dateKey(new Date());
+    const todayMeals = meals.filter(m => m.date === todayKey);
+
+    if (!todayMeals.length) {
+      els.insightText.textContent = 'Log a meal to see today\'s insight.';
+      return;
+    }
+
+    const consumed = todayMeals.reduce((sum, m) => sum + m.calories, 0);
+    const rated = todayMeals.filter(m => Number.isFinite(m.healthinessRating));
+    const avgRating = rated.length
+      ? rated.reduce((sum, m) => sum + m.healthinessRating, 0) / rated.length
+      : null;
+
+    const parts = [`${consumed} / ${goal} kcal so far`];
+    parts.push(avgRating !== null ? `avg healthiness ${avgRating.toFixed(1)}/5` : 'avg healthiness N/A');
+
+    let suggestion;
+    if (avgRating !== null && avgRating < 3) {
+      suggestion = 'Try adding more vegetables or lean protein tomorrow.';
+    } else if (consumed > goal) {
+      suggestion = 'You went over goal today — consider a lighter dinner tomorrow.';
+    } else if (consumed < goal * 0.7) {
+      suggestion = 'You\'re well under goal — a balanced snack could help tomorrow.';
+    } else {
+      suggestion = 'Nice balance today — keep it up tomorrow.';
+    }
+
+    els.insightText.textContent = `${parts.join(' · ')}. ${suggestion}`;
+  }
+
   function renderAll() {
     renderHeader();
     renderSummary();
     renderMealList();
     renderChart();
+    renderInsight();
   }
 
   els.mealForm.addEventListener('submit', (e) => {
