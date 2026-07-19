@@ -344,6 +344,43 @@
     .summary-calories {
       font-size: 2rem;
     }
+    .card {
+      padding: 16px 16px;
+    }
+    .result-card {
+      padding: 14px;
+    }
+  }
+
+  /* Meal add/remove animation */
+  @keyframes mealIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .meal-item.meal-enter {
+    animation: mealIn 0.25s ease;
+  }
+
+  .meal-item.meal-exit {
+    transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.2s ease, margin 0.2s ease, padding 0.2s ease;
+    opacity: 0;
+    transform: translateX(-8px);
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .meal-item.meal-enter,
+    .meal-item.meal-exit,
+    .progress-fill,
+    .chart-bar {
+      animation: none !important;
+      transition: none !important;
+    }
   }
 
   /* Daily insight */
@@ -729,7 +766,7 @@
 
     for (const meal of todayMeals) {
       const li = document.createElement('li');
-      li.className = 'meal-item';
+      li.className = meal.id === lastAddedMealId ? 'meal-item meal-enter' : 'meal-item';
       li.innerHTML = `
         <div class="meal-info">
           <span class="meal-type-badge meal-type-${meal.type}">${meal.type}</span>
@@ -742,6 +779,8 @@
       `;
       els.mealList.appendChild(li);
     }
+
+    lastAddedMealId = null;
   }
 
   function renderChart() {
@@ -852,6 +891,7 @@
     }
 
     meals.push(meal);
+    lastAddedMealId = meal.id;
 
     saveMeals(meals);
     els.mealForm.reset();
@@ -863,14 +903,27 @@
     const btn = e.target.closest('.delete-btn');
     if (!btn) return;
     const id = btn.dataset.id;
-    meals = meals.filter(m => m.id !== id);
-    saveMeals(meals);
-    renderAll();
+    const li = btn.closest('.meal-item');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (li && !reduceMotion) {
+      li.classList.add('meal-exit');
+      li.addEventListener('transitionend', () => {
+        meals = meals.filter(m => m.id !== id);
+        saveMeals(meals);
+        renderAll();
+      }, { once: true });
+    } else {
+      meals = meals.filter(m => m.id !== id);
+      saveMeals(meals);
+      renderAll();
+    }
   });
 
   // --- Snap Your Food (Phase 2: Gemini image analysis) ---
 
   let pendingHealthinessRating = null;
+  let lastAddedMealId = null;
 
   function fileToDataUrl(file) {
     return new Promise((resolve, reject) => {
