@@ -345,6 +345,158 @@
       font-size: 2rem;
     }
   }
+
+  /* Snap Your Food */
+  .snap-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .snap-btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--green-light);
+    color: var(--green);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  .snap-btn:hover { filter: brightness(1.03); }
+
+  .snap-file-input { display: none; }
+
+  .webcam-wrap {
+    margin-top: 14px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .webcam-wrap.is-active { display: flex; }
+
+  #webcam-video {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 12px;
+    background: #000;
+  }
+
+  .snap-status {
+    margin-top: 14px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .snap-status.is-active { display: flex; }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--green-light);
+    border-top-color: var(--green);
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .snap-error {
+    margin-top: 12px;
+    display: none;
+    color: #c0392b;
+    background: #fdecea;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .snap-error.is-active { display: block; }
+
+  .result-card {
+    margin-top: 14px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+
+  .result-card.is-active { display: flex; }
+
+  .result-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .result-food-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .confidence-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .confidence-low { background: #fdecea; color: #c0392b; }
+  .confidence-medium { background: var(--orange-light); color: var(--orange); }
+  .confidence-high { background: var(--green-light); color: var(--green); }
+
+  .result-calories {
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  .result-calories span {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .stars {
+    color: var(--orange);
+    letter-spacing: 2px;
+    font-size: 1rem;
+  }
+
+  .stars .star-empty { color: var(--border); }
+
+  .result-portion,
+  .result-notes {
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .add-to-today-btn {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(90deg, var(--green), var(--orange));
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
 </style>
 </head>
 <body>
@@ -371,6 +523,42 @@
         <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
       </div>
       <div class="progress-caption" id="progress-caption">0% of today's goal</div>
+    </section>
+
+    <section class="card">
+      <h2>Snap Your Food</h2>
+      <div class="snap-actions">
+        <label class="snap-btn" for="snap-file-input">
+          Upload photo
+          <input type="file" id="snap-file-input" class="snap-file-input" accept="image/*">
+        </label>
+        <button type="button" class="snap-btn" id="webcam-toggle-btn">Use webcam</button>
+      </div>
+
+      <div class="webcam-wrap" id="webcam-wrap">
+        <video id="webcam-video" autoplay playsinline></video>
+        <button type="button" class="snap-btn" id="webcam-capture-btn">Capture photo</button>
+        <canvas id="webcam-canvas" hidden></canvas>
+      </div>
+
+      <div class="snap-status" id="snap-status">
+        <span class="spinner"></span>
+        <span>Analyzing your food photo…</span>
+      </div>
+
+      <div class="snap-error" id="snap-error"></div>
+
+      <div class="result-card" id="result-card">
+        <div class="result-top">
+          <span class="result-food-name" id="result-food-name"></span>
+          <span class="confidence-badge" id="result-confidence"></span>
+        </div>
+        <div class="result-calories"><span id="result-calories"></span> <span>kcal (estimated)</span></div>
+        <div class="stars" id="result-stars"></div>
+        <div class="result-portion" id="result-portion"></div>
+        <div class="result-notes" id="result-notes"></div>
+        <button type="button" class="add-to-today-btn" id="add-to-today-btn">Add to Today</button>
+      </div>
     </section>
 
     <section class="card">
@@ -429,6 +617,22 @@
     mealList: document.getElementById('meal-list'),
     emptyState: document.getElementById('empty-state'),
     chart: document.getElementById('chart'),
+    snapFileInput: document.getElementById('snap-file-input'),
+    webcamToggleBtn: document.getElementById('webcam-toggle-btn'),
+    webcamWrap: document.getElementById('webcam-wrap'),
+    webcamVideo: document.getElementById('webcam-video'),
+    webcamCaptureBtn: document.getElementById('webcam-capture-btn'),
+    webcamCanvas: document.getElementById('webcam-canvas'),
+    snapStatus: document.getElementById('snap-status'),
+    snapError: document.getElementById('snap-error'),
+    resultCard: document.getElementById('result-card'),
+    resultFoodName: document.getElementById('result-food-name'),
+    resultConfidence: document.getElementById('result-confidence'),
+    resultCalories: document.getElementById('result-calories'),
+    resultStars: document.getElementById('result-stars'),
+    resultPortion: document.getElementById('result-portion'),
+    resultNotes: document.getElementById('result-notes'),
+    addToTodayBtn: document.getElementById('add-to-today-btn'),
   };
 
   function loadMeals() {
@@ -578,14 +782,21 @@
 
     if (!name || !Number.isFinite(calories) || calories <= 0) return;
 
-    meals.push({
+    const meal = {
       id: crypto.randomUUID(),
       name,
       calories,
       type,
       date: dateKey(new Date()),
       createdAt: Date.now(),
-    });
+    };
+
+    if (Number.isFinite(pendingHealthinessRating)) {
+      meal.healthinessRating = pendingHealthinessRating;
+      pendingHealthinessRating = null;
+    }
+
+    meals.push(meal);
 
     saveMeals(meals);
     els.mealForm.reset();
@@ -600,6 +811,132 @@
     meals = meals.filter(m => m.id !== id);
     saveMeals(meals);
     renderAll();
+  });
+
+  // --- Snap Your Food (Phase 2: Gemini image analysis) ---
+
+  let pendingHealthinessRating = null;
+
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function showSnapError(message) {
+    els.snapError.textContent = message;
+    els.snapError.classList.add('is-active');
+  }
+
+  function clearSnapError() {
+    els.snapError.textContent = '';
+    els.snapError.classList.remove('is-active');
+  }
+
+  function renderResultCard(data) {
+    els.resultFoodName.textContent = data.food_name;
+    els.resultCalories.textContent = data.estimated_calories;
+    els.resultPortion.textContent = data.portion_recommendation;
+    els.resultNotes.textContent = data.notes || '';
+
+    els.resultConfidence.textContent = data.confidence;
+    els.resultConfidence.className = `confidence-badge confidence-${data.confidence}`;
+
+    const rating = data.healthiness_rating;
+    els.resultStars.innerHTML = Array.from({ length: 5 }, (_, i) =>
+      `<span class="${i < rating ? '' : 'star-empty'}">★</span>`
+    ).join('');
+
+    els.resultCard.dataset.name = data.food_name;
+    els.resultCard.dataset.calories = data.estimated_calories;
+    els.resultCard.dataset.rating = rating;
+    els.resultCard.classList.add('is-active');
+  }
+
+  async function analyzeImage(dataUrl) {
+    clearSnapError();
+    els.resultCard.classList.remove('is-active');
+    els.snapStatus.classList.add('is-active');
+
+    try {
+      const res = await fetch('/api/analyze-food', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showSnapError(data.error || 'Could not analyze the image right now.');
+        return;
+      }
+
+      renderResultCard(data);
+    } catch {
+      showSnapError('Could not reach the server. Please try again.');
+    } finally {
+      els.snapStatus.classList.remove('is-active');
+    }
+  }
+
+  els.snapFileInput.addEventListener('change', async () => {
+    const file = els.snapFileInput.files[0];
+    if (!file) return;
+    const dataUrl = await fileToDataUrl(file);
+    analyzeImage(dataUrl);
+    els.snapFileInput.value = '';
+  });
+
+  let webcamStream = null;
+
+  els.webcamToggleBtn.addEventListener('click', async () => {
+    const isActive = els.webcamWrap.classList.contains('is-active');
+
+    if (isActive) {
+      stopWebcam();
+      return;
+    }
+
+    try {
+      webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      els.webcamVideo.srcObject = webcamStream;
+      els.webcamWrap.classList.add('is-active');
+      els.webcamToggleBtn.textContent = 'Close webcam';
+    } catch {
+      showSnapError('Could not access the webcam. You can still upload a photo instead.');
+    }
+  });
+
+  function stopWebcam() {
+    if (webcamStream) {
+      webcamStream.getTracks().forEach(track => track.stop());
+      webcamStream = null;
+    }
+    els.webcamWrap.classList.remove('is-active');
+    els.webcamToggleBtn.textContent = 'Use webcam';
+  }
+
+  els.webcamCaptureBtn.addEventListener('click', () => {
+    const video = els.webcamVideo;
+    const canvas = els.webcamCanvas;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    analyzeImage(dataUrl);
+  });
+
+  els.addToTodayBtn.addEventListener('click', () => {
+    const card = els.resultCard;
+    els.mealName.value = card.dataset.name;
+    els.mealCalories.value = card.dataset.calories;
+    pendingHealthinessRating = Number(card.dataset.rating);
+    els.mealForm.requestSubmit();
+    els.resultCard.classList.remove('is-active');
   });
 
   els.saveGoalBtn.addEventListener('click', () => {

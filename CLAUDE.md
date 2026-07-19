@@ -1,14 +1,15 @@
 # K21 Calorie Tracker
 
 ## Project Purpose
-A calorie tracking app. Users log food and track daily calorie intake. In a
-later phase, food images will be analyzed via Google's Gemini API to
-automatically estimate calories and macros from a photo.
+A calorie tracking app. Users log food and track daily calorie intake.
+Food photos can be analyzed via Google's Gemini API to automatically
+estimate calories, a healthiness rating, and a portion recommendation.
 
 ## Tech Stack
 - Node.js + Express (backend/API server)
 - Vanilla HTML/CSS/JS (frontend, no framework)
-- Google Gemini API (planned, for image analysis)
+- Google Gemini API — `@google/generative-ai` is in use; `POST /api/analyze-food`
+  in `server.js` accepts a base64 image and returns structured JSON.
 
 ## Folder Structure
 As the project grows, expect this layout:
