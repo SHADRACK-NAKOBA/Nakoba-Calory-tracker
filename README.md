@@ -1,4 +1,4 @@
-# K21 Calorie Tracker (Nakoba Edition)
+# Nakoba Calorie Tracker
 
 A calorie tracking app built with Node.js, Express, and vanilla HTML/CSS/JS. Log meals manually or by snapping a food photo analyzed by Google's Gemini Vision API, track daily calorie intake against a goal, and review a weekly history chart plus a daily insight.
 

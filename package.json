@@ -1,7 +1,7 @@
 {
-  "name": "k21-calorie-tracker",
+  "name": "nakoba-calorie-tracker",
   "version": "1.0.0",
-  "description": "K21 Calorie Tracker — a small Express app for logging daily calories.",
+  "description": "Nakoba Calorie Tracker — a small Express app for logging daily calories.",
   "type": "module",
   "main": "server.js",
   "scripts": {

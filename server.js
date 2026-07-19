@@ -113,5 +113,5 @@ app.post('/api/analyze-food', analyzeLimiter, async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`K21 Calorie Tracker running at http://localhost:${PORT}`);
+  console.log(`Nakoba Calorie Tracker running at http://localhost:${PORT}`);
 });

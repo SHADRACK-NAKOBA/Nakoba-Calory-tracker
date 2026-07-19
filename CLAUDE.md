@@ -1,4 +1,4 @@
-# K21 Calorie Tracker
+# Nakoba Calorie Tracker
 
 ## Project Purpose
 A calorie tracking app. Users log food and track daily calorie intake.
