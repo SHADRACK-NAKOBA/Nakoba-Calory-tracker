@@ -2,6 +2,8 @@
 
 A calorie tracking app built with Node.js, Express, and vanilla HTML/CSS/JS. Log meals manually or by snapping a food photo analyzed by Google's Gemini Vision API, track daily calorie intake against a goal, and review a weekly history chart plus a daily insight.
 
+**Live at:** https://nakoba-calory-tracker.onrender.com (Render free tier — first request after idling takes ~30-50s to wake up)
+
 Built end-to-end with Claude Code across three phases, then hardened for production. Full click-by-click build log, production steps, and every error hit along the way: see [NAKOBA_IMPLEMENTATION.md](NAKOBA_IMPLEMENTATION.md).
 
 ## Features
@@ -15,7 +17,7 @@ Built end-to-end with Claude Code across three phases, then hardened for product
 | UI animations + accessibility (ARIA, keyboard, WCAG AA contrast) | ✅ |
 | Security hardening (helmet, CORS, rate limiting) | ✅ |
 | CI (GitHub Actions) | ✅ |
-| Deployment (Render) | 🔲 See production guide |
+| Deployment (Render) | ✅ Live |
 
 ## Tech stack
 

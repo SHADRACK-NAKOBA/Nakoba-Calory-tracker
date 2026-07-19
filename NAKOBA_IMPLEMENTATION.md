@@ -155,10 +155,12 @@ git push origin phase-1-done phase-2-done phase-3-done
    - **Start Command:** `npm start`
    - **Instance Type:** Free tier is enough for this app
 5. Under **Environment Variables**, add `GEMINI_API_KEY` = your real key (never commit it — only ever set it here and in your local `.env`).
-6. Click **Create Web Service**. Render builds and deploys, giving you a public URL (e.g. `nakoba-calorie-tracker.onrender.com`).
+6. Click **Create Web Service**. Render builds and deploys, giving you a public URL.
 7. Every future push to `master` auto-redeploys.
 
 **Note on Render's free tier:** the service spins down after inactivity, so the first request after idling takes ~30-50 seconds to wake up ("cold start"). This is expected, not a bug.
+
+**Status: deployed and verified live** at https://nakoba-calory-tracker.onrender.com — confirmed with real requests against production: home page returns `200` with the correct title, Helmet's CSP/HSTS headers are present, `/api/analyze-food` correctly validates input (`400`, not a `500` "missing key" error — confirming `GEMINI_API_KEY` is set correctly in Render's environment), and a real Gemini call round-trips successfully end-to-end.
 
 ---
 
